@@ -31,7 +31,7 @@ AADT values must be provided as a list using the following JSON format (ID tag m
         },
         {
             "ID":"b2",
-            "latlon":[41.8651, -86.317],
+            "latlon":[0, 1],
             "AADT μ":200,
             "AADT σ":40
         }
