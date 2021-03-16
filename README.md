@@ -55,7 +55,10 @@ python3 QP/preprocessing.py --osm $OSM_FILE --aadt $AADT_JSON --output $OUTPUT_J
 
 For example:
 ```bash
-python3 QP/preprocessing.py --osm examples/Niles/Niles.osm --aadt examples/Niles/Niles_AADT.json  --output test/example1.json
+python3 QP/preprocessing.py \
+    --osm examples/Niles/Niles.osm \
+    --aadt examples/Niles/Niles_AADT.json  \
+    --output test/example1.json
 ```
 
 Use the *--verbose* flag to show a map as well as node and road counts.

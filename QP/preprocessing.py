@@ -486,6 +486,27 @@ plt.plot(lon, lat, "kd")
 # Shows the roads
 node_connection_already_seen = {}
 
+
+
+# Plots AADT roads first
+for an_AADT_road in original_AADT_roads:
+
+    road_info = roads[an_AADT_road]
+    start_node, end_node = road_info["start node"], road_info["end node"]
+
+    road_connection_tracker = "-".join(sorted([start_node, end_node]))
+    node_connection_already_seen[road_connection_tracker] = True
+
+    start_node_info = valid_intersections[start_node]
+    end_node_info = valid_intersections[end_node]
+
+    X = [start_node_info["lon"], end_node_info["lon"]]
+    Y = [start_node_info["lat"], end_node_info["lat"]]
+
+    plt.plot(X, Y, "m-")
+
+
+
 for a_road in roads:
 
     start_node = roads[a_road]["start node"]
@@ -500,7 +521,6 @@ for a_road in roads:
 
     start_node_info = valid_intersections[start_node]
     end_node_info = valid_intersections[end_node]
-
 
     X = [start_node_info["lon"], end_node_info["lon"]]
     Y = [start_node_info["lat"], end_node_info["lat"]]
