@@ -8,9 +8,11 @@ It outputs a JSON file containing a list of nodes and roads. Each road will have
 
 import argparse
 import json
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
+import osqp
 from scipy import sparse
 
 import aux_preprocessing as aux
@@ -131,7 +133,7 @@ b = np.array(b)
 
 
 # -> l vector, always zero
-l = np.zeros((lr))
+l = np.zeros((lr + num_junctions))
 
 
 # -> u vector, always zero except for the first entrances, which are the number of roads
@@ -168,3 +170,51 @@ for j in range(lr, lr + num_junctions):
         C[j][roads_IDs_out] = -1
 
 C = sparse.csc_matrix(C)
+
+
+###########################
+# QP OPTIMIZATION
+###########################
+
+# Create an OSQP object
+prob = osqp.OSQP()
+
+# Setup workspace and change alpha parameter
+prob.setup(A, b, C, l, u, alpha=1.0)
+
+# Solve problem
+res = prob.solve()
+AADT_solutions = res.x
+
+
+
+###########################
+# OUTPUT
+###########################
+
+# Assigns each solution to its corresponding road
+for r in range(0, lr):
+    road_ID = num_to_road_ID[r]
+    road_info[road_ID]["calculated AADT"] = AADT_solutions[r]
+
+
+output_dict = {
+    "nodes":node_info,
+    "roads":road_info
+}
+
+
+# Writes the output to the specified JSON filepath
+with open(args.output, "w") as jf:
+    jf.write(json.dumps(output_dict, indent = 2))
+
+
+
+###########################
+# SHOW AADT MAP
+###########################
+
+# Shows the output map if needed
+if not verbosity:
+    sys.exit()
+
