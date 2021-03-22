@@ -50,7 +50,10 @@ Where:
 
 The OpenStreetMap and AADT data must be preprocessed into a JSON output via:
 ```bash
-python3 QP/preprocessing.py --osm $OSM_FILE --aadt $AADT_JSON --output $OUTPUT_JSON --verbose
+python3 QP/preprocessing.py \
+    --osm $OSM_FILE_FILEPATH \
+    --aadt $AADT_JSON_FILEPATH \
+    --output $OUTPUT_JSON_FILEPATH \
 ```
 
 For example:
@@ -69,7 +72,34 @@ If requesting information about how the flags in more detail, run:
 python3 QP/preprocessing.py --help
 ```
 
+### Convex optimization:
 
+Run the quadratic optimizer (OSQP solver) using the above JSON preprocessed output (note, the *--verbose* flag will have no effect on the
+actual output) in order to obtain a JSON output which will contain nodes and road information, as well as the AADT calculated for each road.
+Run via:
+```bash
+python3 QP/QP.py \
+    --input $PREPROCESSING_OUTPUT_FILEPATH \
+    --output $OUTPUT_JSON_FILEPATH
+```
+
+
+Assuming an output being *test/example1.json*, run via:
+
+```bash
+python3 QP/QP.py \
+    --input test/example1.json \
+    --output test/output1.json
+```
+
+
+Use the *--verbose* flag to show a map of each road, colorcoded depending on the AADT value.
+
+
+If requesting information about how the flags in more detail, run:
+```bash
+python3 QP/QP.py --help
+```
 
 
 ## Neural networks

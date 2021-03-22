@@ -1,7 +1,7 @@
 """
 SUMMARY
 
-Auxiliary functions for preprocessing.py
+Auxiliary functions for preprocessing.py and QP.py
 """
 
 
@@ -129,4 +129,5 @@ def calculate_distance_to_road(x, y, road_ID, road_aux):
         de_sq = (x - xe)**2 + (y - ye)**2
 
         return min(ds_sq, de_sq)
+
 
