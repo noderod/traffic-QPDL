@@ -131,3 +131,15 @@ def calculate_distance_to_road(x, y, road_ID, road_aux):
         return min(ds_sq, de_sq)
 
 
+
+# Interpolates a value
+def interpolate(x, y_min, y_max, x_min, x_max):
+
+    if x >= x_max:
+        return y_max
+
+    Δ = y_max - y_min
+
+    return y_min + Δ*(x - x_min)/(x_max - x_min)
+
+

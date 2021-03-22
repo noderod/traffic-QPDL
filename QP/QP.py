@@ -10,6 +10,7 @@ import argparse
 import json
 import sys
 
+from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
 import numpy as np
 import osqp
@@ -29,6 +30,7 @@ args = parser.parse_args()
 
 # Verbose
 verbosity = args.verbose
+show_map = args.show
 
 
 
@@ -180,7 +182,7 @@ C = sparse.csc_matrix(C)
 prob = osqp.OSQP()
 
 # Setup workspace and change alpha parameter
-prob.setup(A, b, C, l, u, alpha=1.0)
+prob.setup(A, b, C, l, u, alpha=1.0, verbose=verbosity)
 
 # Solve problem
 res = prob.solve()
@@ -215,6 +217,55 @@ with open(args.output, "w") as jf:
 ###########################
 
 # Shows the output map if needed
-if not verbosity:
+if not show_map:
     sys.exit()
 
+
+# Min, max AADT values found
+AADT_min = min(AADT_solutions)
+AADT_max = max(AADT_solutions)
+
+
+lowest_AADT_color  = [0, 0, 102/255]
+highest_AADT_color = [255/255, 0, 0]
+
+
+plt.figure()
+
+
+# Checks each road for its coordinates
+for r in range(0, lr):
+    road_ID = num_to_road_ID[r]
+
+    current_road_info = road_info[road_ID]
+    road_start_node = current_road_info["start node"]
+    road_end_node = current_road_info["end node"]
+
+    # Gets coordinates of the start and end nodes
+    start_x = node_info[road_start_node]["x"]
+    start_y = node_info[road_start_node]["y"]
+
+    end_x = node_info[road_end_node]["x"]
+    end_y = node_info[road_end_node]["y"]
+
+    calculated_AADT = AADT_solutions[r]
+
+    # Assigns the appropriate road color
+    r_equivalent = aux.interpolate(calculated_AADT, lowest_AADT_color[0], highest_AADT_color[0], AADT_min, AADT_max)
+    g_equivalent = aux.interpolate(calculated_AADT, lowest_AADT_color[1], highest_AADT_color[1], AADT_min, AADT_max)
+    b_equivalent = aux.interpolate(calculated_AADT, lowest_AADT_color[2], highest_AADT_color[2], AADT_min, AADT_max)
+
+    plt.plot([start_x, end_x], [start_y, end_y], ls="-", color=[r_equivalent, g_equivalent, b_equivalent])
+
+# Sets the axes
+plt.xlim(-0.1, 1.1)
+plt.ylim(-0.1, 1.1)
+
+# Shows the colormap
+cmap11 = LinearSegmentedColormap.from_list('custom', [lowest_AADT_color, highest_AADT_color])
+img = plt.imshow(np.array([[0, AADT_max]]), cmap=cmap11) # Dummy image that is not plotted
+img.set_visible(False)
+plt.colorbar(orientation="vertical", label = 'AADT (calculated)', ticks = np.linspace(0, AADT_max, 10))
+
+
+plt.show()

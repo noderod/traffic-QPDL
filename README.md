@@ -101,6 +101,9 @@ If requesting information about how the flags in more detail, run:
 python3 QP/QP.py --help
 ```
 
+The solver has been found to return inaccurate results when enforcing strict constraints when setting *adaptive_rho = False*[4]. Therefore, this
+has not been strictly enforced.
+
 
 ## Neural networks
 
@@ -136,3 +139,5 @@ Map data copyrighted OpenStreetMap contributors and available from [https://www.
 1. [https://stackabuse.com/reading-and-writing-xml-files-in-python/](https://stackabuse.com/reading-and-writing-xml-files-in-python/)
 2. [https://stackoverflow.com/questions/17390166/python-xml-minidom-get-element-by-tag-in-child-node](https://stackoverflow.com/questions/17390166/python-xml-minidom-get-element-by-tag-in-child-node), question
 3. [https://mdotcf.state.mi.us/public/maps_adtmaparchive/listfiles.cfm?folder=2013adt](https://mdotcf.state.mi.us/public/maps_adtmaparchive/listfiles.cfm?folder=2013adt)
+4. [https://github.com/oxfordcontrol/OSQP.jl/issues/47](https://github.com/oxfordcontrol/OSQP.jl/issues/47)
+5. [https://github.com/noderod/City-Learning/blob/master/NY_fire_inspection/NY_Visualizer.py](https://github.com/noderod/City-Learning/blob/master/NY_fire_inspection/NY_Visualizer.py)
