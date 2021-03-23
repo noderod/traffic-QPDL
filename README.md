@@ -151,3 +151,6 @@ Map data copyrighted OpenStreetMap contributors and available from [https://www.
 3. [https://mdotcf.state.mi.us/public/maps_adtmaparchive/listfiles.cfm?folder=2013adt](https://mdotcf.state.mi.us/public/maps_adtmaparchive/listfiles.cfm?folder=2013adt)
 4. [https://github.com/oxfordcontrol/OSQP.jl/issues/47](https://github.com/oxfordcontrol/OSQP.jl/issues/47)
 5. [https://github.com/noderod/City-Learning/blob/master/NY_fire_inspection/NY_Visualizer.py](https://github.com/noderod/City-Learning/blob/master/NY_fire_inspection/NY_Visualizer.py)
+6. [https://www.rapidtables.com/web/color/RGB_Color.html](https://www.rapidtables.com/web/color/RGB_Color.html)
+7. [https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html](https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html)
+8. [https://stackoverflow.com/questions/6715442/how-to-add-matplotlib-colorbar-ticks](https://stackoverflow.com/questions/6715442/how-to-add-matplotlib-colorbar-ticks), using *Eryk Sun*'s answer

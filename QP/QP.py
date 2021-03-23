@@ -189,6 +189,9 @@ res = prob.solve()
 AADT_solutions = res.x
 
 
+# If an AADT value is lower than zero for any value, correct it by minimizing the squared error
+# TODO
+
 
 ###########################
 # OUTPUT
@@ -226,8 +229,35 @@ AADT_min = min(AADT_solutions)
 AADT_max = max(AADT_solutions)
 
 
-lowest_AADT_color  = [0, 0, 102/255]
-highest_AADT_color = [255/255, 0, 0]
+# Colors obtained from https://www.rapidtables.com/web/color/RGB_Color.html
+# From lowest AADT to highest AADT
+utilized_colors = [
+    [0, 0, 255/255],
+    [0, 128/255, 255/255],
+    [0, 255/255, 255/255],
+    [0, 255/255, 128/255],
+    [0, 255/255, 0],
+    [128/255, 255/255, 0],
+    [255/255, 255/255, 0],
+    [255/255, 128/255, 0],
+    [255/255, 0, 0]
+]
+
+
+# Ordered AADT values
+AADT_solutions_sorted = sorted(AADT_solutions)
+
+
+# Corresponding AADT values
+AADT_color_limits = []
+# There must be the same number of AADT separator values as colors
+luc_1 = len(utilized_colors) - 1
+l_AADT = len(AADT_solutions_sorted)
+
+for qq in range(0, luc_1):
+    AADT_color_limits.append(AADT_solutions_sorted[int(l_AADT*qq/luc_1)])
+else:
+    AADT_color_limits.append(AADT_max)
 
 
 plt.figure()
@@ -250,22 +280,30 @@ for r in range(0, lr):
 
     calculated_AADT = AADT_solutions[r]
 
-    # Assigns the appropriate road color
-    r_equivalent = aux.interpolate(calculated_AADT, lowest_AADT_color[0], highest_AADT_color[0], AADT_min, AADT_max)
-    g_equivalent = aux.interpolate(calculated_AADT, lowest_AADT_color[1], highest_AADT_color[1], AADT_min, AADT_max)
-    b_equivalent = aux.interpolate(calculated_AADT, lowest_AADT_color[2], highest_AADT_color[2], AADT_min, AADT_max)
+    # Finds the location
+    # Cannot be larger 
+    location = np.searchsorted(AADT_color_limits, calculated_AADT)
 
-    plt.plot([start_x, end_x], [start_y, end_y], ls="-", color=[r_equivalent, g_equivalent, b_equivalent])
+    # Assigns the appropriate road color
+    r_equivalent = aux.interpolate(calculated_AADT, utilized_colors[location - 1][0], utilized_colors[location][0], AADT_color_limits[location - 1], AADT_color_limits[location])
+
+    g_equivalent = aux.interpolate(calculated_AADT, utilized_colors[location - 1][1], utilized_colors[location][1], AADT_color_limits[location - 1], AADT_color_limits[location])
+    b_equivalent = aux.interpolate(calculated_AADT, utilized_colors[location - 1][2], utilized_colors[location][2], AADT_color_limits[location - 1], AADT_color_limits[location])
+
+    plt.plot([start_x, end_x], [start_y, end_y], ls="-", lw=3, color=[r_equivalent, g_equivalent, b_equivalent])
+
 
 # Sets the axes
 plt.xlim(-0.1, 1.1)
 plt.ylim(-0.1, 1.1)
 
 # Shows the colormap
-cmap11 = LinearSegmentedColormap.from_list('custom', [lowest_AADT_color, highest_AADT_color])
+cmap11 = LinearSegmentedColormap.from_list('custom', utilized_colors)
 img = plt.imshow(np.array([[0, AADT_max]]), cmap=cmap11) # Dummy image that is not plotted
 img.set_visible(False)
-plt.colorbar(orientation="vertical", label = 'AADT (calculated)', ticks = np.linspace(0, AADT_max, 10))
+utilized_colorbar = plt.colorbar(orientation="vertical", label = 'AADT (calculated), scale is linear between each mark', ticks = np.linspace(AADT_min, AADT_max, len(utilized_colors)))
+utilized_colorbar.set_ticklabels(AADT_color_limits)
 
+plt.title("AADT calculated per road")
 
 plt.show()
