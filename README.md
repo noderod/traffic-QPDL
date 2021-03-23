@@ -72,6 +72,16 @@ If requesting information about how the flags in more detail, run:
 python3 QP/preprocessing.py --help
 ```
 
+
+The following types of ways are not used when calculating traffic values:
+* aeroway: Cannot drive (unless way is a highway)
+* cycleway: Cannot drive (unless way is a highway)
+* footway: Cannot drive (unless way is a highway)
+* railway: Cannot drive (unless way is a highway)
+* waterway: Cannot drive (unless way is a highway)
+* highway/service/driveway: Not a road designed for continuous driving
+* highway/service/parking_asile: Not a road designed for continuous driving
+
 ### Convex optimization:
 
 Run the quadratic optimizer (OSQP solver) using the above JSON preprocessed output (note, the *--verbose* flag will have no effect on the

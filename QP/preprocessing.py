@@ -60,7 +60,17 @@ invalid_ways = {
     "railway":True,
     "cycleway":True,
     "footway":True,
-    "aeroway":True
+    "aeroway":True,
+    "waterway":True,
+    "amenity":True,
+    "leisure":True,
+    "building":True
+}
+
+# Invalid services
+invalid_services = {
+    "driveway":True,
+    "parking_aisle":True
 }
 
 
@@ -74,14 +84,30 @@ for a_way in ways_provided:
 
     # Only roads are considered
     way_not_meant_for_cars = False
+    way_is_not_highway = True
 
 
     for an_extra_tag in tags_in_way:
 
-        k = an_extra_tag.attributes["k"].value
+        k = an_extra_tag.attributes["k"].value.lower()
 
-        if k.lower() in invalid_ways:
+        if k == "highway":
+            way_is_not_highway = False
+            way_not_meant_for_cars = False
+
+
+        if way_is_not_highway and (k in invalid_ways):
             way_not_meant_for_cars = True
+            continue
+
+        # Skips driveways
+        if k == "service":
+            v = an_extra_tag.attributes["v"].value
+
+            if v in invalid_services:
+                way_not_meant_for_cars = True
+                break
+
 
         if k == "oneway":
             way_is_twoway = False
