@@ -131,7 +131,6 @@ for an_AADT_road in AADT_info:
     observed_max_ADDT = max(observed_max_ADDT, AADT_μ)
 
 A = sparse.csc_matrix(A)
-b = np.array(b)
 
 
 # -> l vector, always zero
@@ -190,7 +189,53 @@ AADT_solutions = res.x
 
 
 # If an AADT value is lower than zero for any value, correct it by minimizing the squared error
-# TODO
+found_negative = False
+for a_road_traffic in AADT_solutions:
+    if a_road_traffic < 0:
+        found_negative = True
+        break
+
+
+if found_negative:
+
+    print("A negative AADT value was found for at least one road, correcting it by attempting to minimize SSE under the same junction constraints")
+
+
+    # Attempts to minimze the SSE with a second quadratic optimizer
+
+    # Attempt to minimize \sum (t_r1 - t_r)**2, where t_r is a constant
+
+    # -> b vector (always zero)
+    b = np.zeros((lr))
+
+    for r in range(0, lr):
+        b[r] = -2*AADT_solutions[r]
+
+
+    # -> A matrix
+
+    # Start with all inputs being zero
+    A = np.zeros((lr, lr))
+
+    for r in range(0, lr):
+        # 2 because OSQP minimizes 1/2 x^T A x + bx
+        A[r][r] = 2
+    A = sparse.csc_matrix(A)
+
+
+    # -> l vector, u vector, C matrix
+    # No change
+
+
+    SSE_minimzer = osqp.OSQP()
+
+    # Setup workspace and change alpha parameter
+    SSE_minimzer.setup(A, b, C, l, u, alpha=1.0, verbose=verbosity)
+
+    # Solve problem
+    res = SSE_minimzer.solve()
+    AADT_solutions = res.x
+
 
 
 ###########################
@@ -258,6 +303,7 @@ for qq in range(0, luc_1):
     AADT_color_limits.append(AADT_solutions_sorted[int(l_AADT*qq/luc_1)])
 else:
     AADT_color_limits.append(AADT_max)
+
 
 
 plt.figure()
