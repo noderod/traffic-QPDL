@@ -24,7 +24,7 @@ required_flags = parser.add_argument_group(title="Required")
 required_flags.add_argument("--input",required=True,  help="Filepath to preprocessing output filepath, taken as input to be read", type=str)
 required_flags.add_argument("--output", required=True, help="Filepath to output JSON", type=str)
 parser.add_argument("--show", help="Show nodes and ways in a map", action="store_true")
-parser.add_argument("--verbose", help="Show nodes and ways in a map", action="store_true")
+parser.add_argument("--verbose", help="OSQP solver verbosity, notes when the solver returns a negative value", action="store_true")
 args = parser.parse_args()
 
 

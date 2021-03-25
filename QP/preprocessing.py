@@ -23,7 +23,7 @@ required_flags.add_argument("--osm",required=True,  help="Filepath to OSM (XML) 
 required_flags.add_argument("--aadt",required=True,  help="Filepath to AADT (JSON) input to be read", type=str)
 required_flags.add_argument("--output", required=True, help="Filepath to output JSON", type=str)
 parser.add_argument("--show", help="Show nodes and ways in a map", action="store_true")
-parser.add_argument("--verbose", help="Show nodes and ways in a map", action="store_true")
+parser.add_argument("--verbose", help="Show counts of nodes and ways", action="store_true")
 args = parser.parse_args()
 
 
@@ -74,6 +74,9 @@ invalid_services = {
 }
 
 
+
+
+
 for a_way in ways_provided:
 
     wid_osm = a_way.attributes["id"].value
@@ -85,6 +88,9 @@ for a_way in ways_provided:
     # Only roads are considered
     way_not_meant_for_cars = False
     way_is_not_highway = True
+
+    # Specialized conditions for non highways
+    way_is_short_range = True
 
 
     for an_extra_tag in tags_in_way:
@@ -108,10 +114,9 @@ for a_way in ways_provided:
                 way_not_meant_for_cars = True
                 break
 
-
         if k == "oneway":
             way_is_twoway = False
-            break
+
 
     # Avoids non-roads
     if way_not_meant_for_cars:
@@ -440,10 +445,11 @@ for AADT_info in AADT_provided:
     road_AADT[closest_road_ID] = {"μ":μ, "σ":σ}
 
 
+original_AADT_roads = list(road_AADT.keys())
+
 
 
 # Handles two-way roads, also assigning the same AADT to the oppsoite direction
-original_AADT_roads = list(road_AADT.keys())
 for an_AADT_road in original_AADT_roads:
 
     road_info = roads[an_AADT_road]
@@ -487,7 +493,7 @@ with open(args.output, "w") as jf:
 # SHOWS THE MAP
 ###########################
 
-if not verbosity:
+if not args.show:
     sys.exit()
 
 

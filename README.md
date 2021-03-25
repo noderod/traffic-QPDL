@@ -64,7 +64,7 @@ python3 QP/preprocessing.py \
     --output test/example1.json
 ```
 
-Use the *--verbose* flag to show a map as well as node and road counts.
+Use the *--show* flag to show a map as well as node and road counts.
 
 
 If requesting information about how the flags in more detail, run:
