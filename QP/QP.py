@@ -198,7 +198,8 @@ for a_road_traffic in AADT_solutions:
 
 if found_negative:
 
-    print("A negative AADT value was found for at least one road, correcting it by attempting to minimize SSE under the same junction constraints")
+    if verbosity:
+        print("A negative AADT value was found for at least one road, correcting it by attempting to minimize SSE under the same junction constraints")
 
 
     # Attempts to minimze the SSE with a second quadratic optimizer
