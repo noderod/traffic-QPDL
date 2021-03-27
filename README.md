@@ -181,3 +181,4 @@ Map data copyrighted OpenStreetMap contributors and available from [https://www.
 9. [https://www.cyberciti.biz/faq/howto-check-if-a-directory-exists-in-a-bash-shellscript/](https://www.cyberciti.biz/faq/howto-check-if-a-directory-exists-in-a-bash-shellscript/)
 10. [https://www.cyberciti.biz/faq/bash-loop-over-file/](https://www.cyberciti.biz/faq/bash-loop-over-file/)
 11. [https://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash](https://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash), using *Tomi Po*'s answer
+12. [https://stackoverflow.com/questions/18668556/how-to-compare-numbers-in-bash](https://stackoverflow.com/questions/18668556/how-to-compare-numbers-in-bash), using *Gabriel Staples* and *jordanm*'s answer
