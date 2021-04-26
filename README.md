@@ -182,3 +182,6 @@ Map data copyrighted OpenStreetMap contributors and available from [https://www.
 10. [https://www.cyberciti.biz/faq/bash-loop-over-file/](https://www.cyberciti.biz/faq/bash-loop-over-file/)
 11. [https://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash](https://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash), using *Tomi Po*'s answer
 12. [https://stackoverflow.com/questions/18668556/how-to-compare-numbers-in-bash](https://stackoverflow.com/questions/18668556/how-to-compare-numbers-in-bash), using *Gabriel Staples* and *jordanm*'s answer
+13. [https://www.cs.ubc.ca/~murphyk/Teaching/CS540-Fall08/hw2.pdf](https://www.cs.ubc.ca/~murphyk/Teaching/CS540-Fall08/hw2.pdf)
+14. [https://www.tutorialspoint.com/numpy/numpy_inv.htm](https://www.tutorialspoint.com/numpy/numpy_inv.htm)
+15. [https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.ylim.html](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.ylim.html)
