@@ -35,6 +35,20 @@ verbosity = args.verbose
 # Reads XML file
 osm_data = minidom.parse(args.osm)
 
+
+# Gets the bounds
+bounds_provided = osm_data.getElementsByTagName("bounds")
+
+for bounds_xml in bounds_provided:
+    bound_lat_min = float(bounds_xml.attributes["minlat"].value)
+    bound_lat_max = float(bounds_xml.attributes["maxlat"].value)
+    bound_lon_min = float(bounds_xml.attributes["minlon"].value)
+    bound_lon_max = float(bounds_xml.attributes["maxlon"].value)
+
+
+
+
+
 # Gets the list of nodes
 nodes_provided = osm_data.getElementsByTagName("node")
 
@@ -512,7 +526,7 @@ for a_node in valid_intersections:
     lat.append(node_info["lat"])
     lon.append(node_info["lon"])
 
-plt.plot(lon, lat, "kd")
+plt.plot(lon, lat, "ko")
 
 
 # Shows the roads
@@ -535,7 +549,7 @@ for an_AADT_road in original_AADT_roads:
     X = [start_node_info["lon"], end_node_info["lon"]]
     Y = [start_node_info["lat"], end_node_info["lat"]]
 
-    plt.plot(X, Y, "m-")
+    plt.plot(X, Y, "g-", lw=4)
 
 
 
@@ -557,13 +571,17 @@ for a_road in roads:
     X = [start_node_info["lon"], end_node_info["lon"]]
     Y = [start_node_info["lat"], end_node_info["lat"]]
 
-    plt.plot(X, Y, "b-")
+    plt.plot(X, Y, "k-", lw=1)
 
 
 
 
 
 plt.xlabel("Longitude")
-plt.xlabel("Latitude")
+plt.ylabel("Latitude")
+
+# https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.ylim.html
+plt.xlim([bound_lon_min, bound_lon_max])
+plt.ylim([bound_lat_min, bound_lat_max])
 
 plt.show()
