@@ -262,7 +262,8 @@ for r in range(0, lr):
 
 output_dict = {
     "nodes":node_info,
-    "roads":road_info
+    "roads":road_info,
+    "bounds": road_raw["bounds"]
 }
 
 
