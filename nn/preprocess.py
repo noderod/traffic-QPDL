@@ -19,7 +19,7 @@ def remap_nodes(road_info):
             counter += 1
 
     num_roads = len(remap_dict)
-    adj = np.matrix(np.zeros((num_roads, num_roads)), dtype=np.float32)
+    adj = np.matrix(np.zeros((num_roads, num_roads)))
     for road in road_info:
         start_node = remap_dict[road_info[road]["start node"]]
         end_node = remap_dict[road_info[road]["end node"]]
@@ -70,6 +70,7 @@ def preprocess_x(x, node_maps):
     mus, sigs = to_adjacency(road_info, AADT_info, node_maps=node_maps, reduce_mat=False, sparse_mat=True)
 
     return mus, sigs
+
 
 def preprocess_y(road_info, node_maps):
     AADT_info = {}
