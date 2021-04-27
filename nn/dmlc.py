@@ -13,10 +13,12 @@ from dgl.dataloading import GraphDataLoader
 import dgl.function as fn
 from dgl import DGLGraph
 import matplotlib.pyplot as plt
+from scipy import sparse
 
 from sklearn.model_selection import train_test_split
 
-
+# From https://github.com/dmlc/dgl/tree/master/examples/pytorch/ogb/ogbn-proteins
+# Author: Zhengdao Chen
 class MWEConv(nn.Module):
     def __init__(self,
                  in_feats,
@@ -55,9 +57,6 @@ class MWEConv(nn.Module):
     def forward(self, g, node_state_prev):
         node_state = node_state_prev
 
-        # if self.dropout:
-        #     node_states = self.dropout(node_state)
-
         g = g.local_var()
 
         new_node_states = []
@@ -86,18 +85,8 @@ class MWEConv(nn.Module):
 
         return node_states
 
-def normalize_edge_weights(graph, num_ew_channels, device="cpu"):
-    degs = graph.in_degrees().float()
-    degs = torch.clamp(degs, min=1)
-    norm = torch.pow(degs, 0.5)
-    norm = norm.to(device)
-    graph.ndata['norm'] = norm.unsqueeze(1)
-    graph.apply_edges(fn.e_div_u('feat', 'norm', 'feat'))
-    graph.apply_edges(fn.e_div_v('feat', 'norm', 'feat'))
-    for channel in range(num_ew_channels):
-        graph.edata['feat_' + str(channel)] = graph.edata['feat'][:, channel:channel+1]
-
-
+# From https://github.com/dmlc/dgl/tree/master/examples/pytorch/ogb/ogbn-proteins
+# Author: Zhengdao Chen
 class MWE_GCN(nn.Module):
     def __init__(self,
                  n_input,
@@ -133,6 +122,8 @@ class MWE_GCN(nn.Module):
         return out
 
 
+# From https://github.com/dmlc/dgl/tree/master/examples/pytorch/ogb/ogbn-proteins
+# Author: Zhengdao Chen
 class MWE_DGCN(nn.Module):
     def __init__(self,
                  n_input,
@@ -167,7 +158,6 @@ class MWE_DGCN(nn.Module):
         self.pred_out = nn.Linear(n_hidden, n_output)
         self.device = device
 
-
     def forward(self, g, node_state=None):
         node_state = torch.ones(g.number_of_nodes(), 1).float().to(self.device)
 
@@ -190,19 +180,22 @@ class MWE_DGCN(nn.Module):
 
         return out
 
-
-def convert(sample, adj):
-    sample /= sample.max()
+### THE FOLLOWING IS ALL /MY/ CODE (Jack Steilberg), and is not sourced like the above
+def convert(sample, adj, samp_max):
+    sample /= samp_max
     gr =  dgl.from_scipy(adj.copy())
     gr.edges[sample.nonzero()].data["feat_0"] = torch.FloatTensor(sample[sample.nonzero()]).squeeze()
     return gr
 
-def train_test(model, X, y, adj):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2)
-
+def train_test(model, X_train, X_test, y_train, y_test, adj, epochs):
     print("Reformatting data")
-    train_zipped = [(convert(x_samp, adj), convert(y_samp, adj)) for x_samp, y_samp in zip(X_train, y_train)]
-    test_zipped = [(convert(x_samp, adj), convert(y_samp, adj)) for x_samp, y_samp in zip(X_test, y_test)]
+    #train_y_maxes = [samp.max() for samp in y_train]
+    test_y_max = max([samp.max() for samp in y_test])
+    
+    train_zipped = [(convert(x_samp, adj, test_y_max),
+                     convert(y_samp, adj, test_y_max)) for x_samp, y_samp in zip(X_train, y_train)]
+    test_zipped = [(convert(x_samp, adj, test_y_max),
+                    convert(y_samp, adj, test_y_max)) for x_samp, y_samp in zip(X_test, y_test)]
 
     criterion = nn.MSELoss()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.09)
@@ -215,16 +208,20 @@ def train_test(model, X, y, adj):
                         shuffle=True)
 
     test_loader = GraphDataLoader(test_zipped, batch_size=batch_size,
-                                         shuffle=True)
+                                        shuffle=False)
 
-    criterion = lambda outputs, labels: torch.sum(torch.abs(outputs - labels))
+    criterion = lambda outputs, labels: torch.sum((outputs - labels)**2)
+    intermittent_testing = True
 
-    for epoch in range(10):  # loop over the dataset multiple times
-        print("epoch")
+    train_losses = []
+    test_losses = []
+    for epoch in range(epochs):  # loop over the dataset multiple times
+        print(f"Epoch {epoch}")
         running_loss = 0.0
         for i, batch in enumerate(loader, 0):
             # get the inputs; data is a list of [inputs, labels]
             inputs, labels = batch
+            
             # zero the parameter gradients
             optimizer.zero_grad()
             model.train()
@@ -237,36 +234,65 @@ def train_test(model, X, y, adj):
             labels = torch.sparse.FloatTensor(labels_adj.indices(), labels_adj.values()*labels.edata["feat_0"], size=labels_adj.shape)
 
             loss = criterion(outputs, labels)
-            if i%50==49:
-                import pdb
-                pdb.set_trace()
+            if i%25==24:
+                pass
+                #import pdb
+                #pdb.set_trace()
 
             # print statistics
             once_loss = loss.item()
+            train_losses.append(once_loss)
             running_loss += once_loss
             if i % 1 == 1 or True:
                 print('[%d, %3d]      loss: %.3f' %
                       (epoch + 1, i + 1, once_loss))
 
-            if i%10==9:
+            if i%25==24 and intermittent_testing:
                 test_loss = 0.0
                 with torch.no_grad():
-                    for data in test_loader:
+                    for idx, data in enumerate(test_loader):
                         images, labels = data
                         outputs = model(images)
 
                         labels_adj = labels.adj().coalesce()
-                        outputs = outputs * labels_adj.to_dense()
-                        labels = torch.sparse.FloatTensor(labels_adj.indices(), labels_adj.values()*labels.edata["feat_0"], size=labels_adj.shape)
-
+                        outputs = outputs * labels_adj.to_dense() #* test_y_max
+                        labels = torch.sparse.FloatTensor(labels_adj.indices(), labels_adj.values()*labels.edata["feat_0"], size=labels_adj.shape) #* test_y_max
                         test_once_loss = criterion(outputs, labels).item()
                         test_loss += test_once_loss
+                    test_losses.append(test_loss/len(test_loader))
                 print('[%d, %3d] test loss: %.3f' %
                       (epoch + 1, i + 1, test_loss/len(test_loader)))
 
             loss.backward()
             optimizer.step()
 
+    import numpy as np
+    train_losses = np.array(train_losses)/40
+    test_losses = np.array(test_losses)/40 # Scale because of lack of batch size
+    train_losses = [np.mean(train_losses[i:i+25]) for i in range(0, len(train_losses), 25)]
+    import matplotlib.pyplot as plt
+    plt.plot(train_losses[1:], label="Train loss")
+    plt.plot(test_losses[:-1], label="Test loss")
+    plt.legend()
+    plt.title("Loss for normalized data, convolutional network")
+    plt.show()
 
+    true_test = []
+    pred_test = []
+    with torch.no_grad():
+        for idx, data in enumerate(test_loader):
+            images, labels = data
+            outputs = model(images)
+
+            labels_adj = labels.adj().coalesce()
+            outputs = outputs * labels_adj.to_dense() * test_y_max
+            labels = torch.sparse.FloatTensor(labels_adj.indices(), labels_adj.values()*labels.edata["feat_0"], size=labels_adj.shape) * test_y_max
+            pred_test += [sparse.csr_matrix(outputs)]
+            true_test += [sparse.csr_matrix(labels.to_dense())]
+
+            test_once_loss = criterion(outputs, labels).item() / len(test_loader)
+            test_loss += test_once_loss
+    print(f"Final test loss: {test_loss/len(test_loader)}")
     print("Finished training")
-    return model
+    
+    return model, pred_test, true_test
