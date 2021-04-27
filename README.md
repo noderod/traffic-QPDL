@@ -146,7 +146,7 @@ then run the network with
 python3 nn/main.py --epochs 10 --model gcn --data-folder <path-to-data-folder>
 ```
 
-The path to the data folder points to a folder created by the qp solver with subfolders "multiple" and "multiple_output"
+The path to the data folder points to a folder created by the qp solver with subfolders "multiple" and "multiple_output".
 
 For other command options run `python nn/main.py --help`.
 
