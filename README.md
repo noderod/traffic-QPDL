@@ -135,10 +135,18 @@ be stored in a directory of the same name but ending in *_output*.
 For example:
 ```bash
 ./generate_multiple_QP_solutions.sh examples/Niles/Niles.osm examples/Niles/Niles_AADT.json test/example1.json  20 test/multiple/
+
 ```
 
+### Running the neural network
 
+Simply install the requirements by running `pip install requirements.txt`,
+then run the network with 
+```bash
+python3 nn/main.py --epochs 10 --model gcn --data-folder <path-to-data-folder>
+```
 
+The path to the data folder points to a folder created by the qp solver with subfolders "multiple" and "multiple_output"
 
 
 

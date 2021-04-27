@@ -11,8 +11,6 @@ from sklearn.model_selection import train_test_split
 
 import numpy as np
 
-from gcnn import GraphConvolution
-
 import pdb
 
 batch_size=20

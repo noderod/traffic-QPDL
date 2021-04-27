@@ -19,7 +19,7 @@ import dgl
 import pandas as pd
 
 def dcgn_model(X_train, X_test, y_train, y_test, adj, epochs=2):
-    model = dmlc.MWE_DGCN(1, 100, X_train[0].iloc[0].shape[1], 3, F.relu, 0)
+    model = dmlc.MWE_DGCN(1, 300, X_train[0].iloc[0].shape[1], 10, F.relu, 0)
     model, pred_test, true_test = dmlc.train_test(model, X_train[0], X_test[0], y_train[0], y_test[0], adj, epochs=epochs)
 
     return model, pred_test, true_test
@@ -50,7 +50,8 @@ def sklearn_model(X, y):
 @click.command()
 @click.option('--data-folder', help='Path to QP input/output', default="data")
 @click.option('--epochs', help="Number of epochs to run", default=5)
-def main(data_folder, epochs):
+@click.option('--model', help="Model to use (mlp for multilayer perceptron, gcn for graph convolutional)", default="gcn")
+def main(data_folder, epochs, model):
     X, y, adj, node_maps,files = make_data_cached(data_folder, force_reload=False)
     files = np.array(files)
     print(X[0].shape)
@@ -62,8 +63,10 @@ def main(data_folder, epochs):
     if 0 not in X_test.index:
         import sys
         sys.exit(0)
-    #model, pred_test, true_test = dense_model(X_train, X_test, y_train, y_test, adj, epochs=epochs)
-    model, pred_test, true_test = dcgn_model(X_train, X_test, y_train, y_test, adj, epochs=epochs)
+    if model == "mlp":
+        model, pred_test, true_test = dense_model(X_train, X_test, y_train, y_test, adj, epochs=epochs)
+    elif model == "gcn": 
+        model, pred_test, true_test = dcgn_model(X_train, X_test, y_train, y_test, adj, epochs=epochs)
 
     output_results(data_folder, pred_test, true_test, node_maps, files[X_test.index])
     pdb.set_trace()
