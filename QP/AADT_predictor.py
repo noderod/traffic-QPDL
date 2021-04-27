@@ -17,7 +17,7 @@ import numpy.linalg as LA
 parser = argparse.ArgumentParser()
 required_flags = parser.add_argument_group(title="Required")
 required_flags.add_argument("--AADT-inputs",required=True,  help="Path to directory containing all AADT inputs (including the ending '/')", type=str)
-required_flags.add_argument("--QP-outputs", required=True, help="Path to directory containing all Qp outputs from the AADT inputs (including the ending '/')", type=str)
+required_flags.add_argument("--QP-outputs", required=True, help="Path to directory containing all QP outputs from the AADT inputs (including the ending '/')", type=str)
 args = parser.parse_args()
 
 

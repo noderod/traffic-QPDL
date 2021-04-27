@@ -8,6 +8,7 @@ It outputs a JSON file containing a list of nodes and roads. Each road will have
 
 import argparse
 import json
+import pickle
 import sys
 
 from matplotlib.colors import LinearSegmentedColormap
@@ -23,10 +24,14 @@ parser = argparse.ArgumentParser()
 required_flags = parser.add_argument_group(title="Required")
 required_flags.add_argument("--input",required=True,  help="Filepath to preprocessing output filepath, taken as input to be read", type=str)
 required_flags.add_argument("--output", required=True, help="Filepath to output JSON", type=str)
-parser.add_argument("--show", help="Show nodes and ways in a map", action="store_true")
+required_flags.add_argument("--QP-matrices-outputs", help="Pickle filepath to output the QP matrices (A, b, l, C, u) as outputs", type=str)
+parser.add_argument("--show", help="Show nodes and ways in a map (not designed for use within a batch solve via generate_multiple_QP_solutions.sh)", action="store_true")
 parser.add_argument("--verbose", help="OSQP solver verbosity, notes when the solver returns a negative value", action="store_true")
 args = parser.parse_args()
 
+
+# Pickle output file
+matrices_qp_pickle_location = args.QP_matrices_outputs
 
 # Verbose
 verbosity = args.verbose
@@ -188,6 +193,12 @@ res = prob.solve()
 AADT_solutions = res.x
 
 
+# Stores the matrices if needed
+# https://wiki.python.org/moin/UsingPickle
+if (matrices_qp_pickle_location != None) and (matrices_qp_pickle_location != ""):
+    pickle.dump({"A":A, "b":b, "l":l, "C":C, "u":u}, open(matrices_qp_pickle_location, "wb"))
+
+
 # If an AADT value is lower than zero for any value, correct it by minimizing the squared error
 found_negative = False
 for a_road_traffic in AADT_solutions:
@@ -251,7 +262,8 @@ for r in range(0, lr):
 
 output_dict = {
     "nodes":node_info,
-    "roads":road_info
+    "roads":road_info,
+    "bounds": road_raw["bounds"]
 }
 
 
@@ -319,11 +331,11 @@ for r in range(0, lr):
     road_end_node = current_road_info["end node"]
 
     # Gets coordinates of the start and end nodes
-    start_x = node_info[road_start_node]["x"]
-    start_y = node_info[road_start_node]["y"]
+    start_x = node_info[road_start_node]["lon"]
+    start_y = node_info[road_start_node]["lat"]
 
-    end_x = node_info[road_end_node]["x"]
-    end_y = node_info[road_end_node]["y"]
+    end_x = node_info[road_end_node]["lon"]
+    end_y = node_info[road_end_node]["lat"]
 
     calculated_AADT = AADT_solutions[r]
 
@@ -340,9 +352,13 @@ for r in range(0, lr):
     plt.plot([start_x, end_x], [start_y, end_y], ls="-", lw=3, color=[r_equivalent, g_equivalent, b_equivalent])
 
 
-# Sets the axes
-plt.xlim(-0.1, 1.1)
-plt.ylim(-0.1, 1.1)
+# Sets the axes and bounds
+bound_lat_min, bound_lat_max, bound_lon_min, bound_lon_max = road_raw["bounds"]
+plt.xlim(bound_lon_min, bound_lon_max)
+plt.ylim(bound_lat_min, bound_lat_max)
+
+plt.xlabel("Longitude")
+plt.ylabel("Latitude")
 
 # Shows the colormap
 cmap11 = LinearSegmentedColormap.from_list('custom', utilized_colors)

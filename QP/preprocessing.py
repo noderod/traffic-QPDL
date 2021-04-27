@@ -492,7 +492,8 @@ if verbosity:
 output_dict = {
     "nodes":valid_intersections,
     "roads":roads,
-    "AADT roads":road_AADT
+    "AADT roads":road_AADT,
+    "bounds":[bound_lat_min, bound_lat_max, bound_lon_min, bound_lon_max]
 }
 
 
