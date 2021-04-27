@@ -139,10 +139,6 @@ For example:
 
 
 
-## Neural networks
-
-
-
 
 
 
